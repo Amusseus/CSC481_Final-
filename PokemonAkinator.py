@@ -60,7 +60,7 @@ def filterLegendary(answer, rows):
         return new_rows
     if answer == 'no':
         for pokemon in rows:
-            if pokemon[12] == 'True':
+            if pokemon[12] == 'False':
                 new_rows.append(pokemon)
         print('removed legendary pokemon')
         return new_rows
