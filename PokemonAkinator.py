@@ -8,6 +8,18 @@ def ask_question(question):
         else:
             print("Please answer with 'yes' or 'no'.")
 
+def ask_generation(question):
+    while True:
+        answer = input(question + " (1-6): ").lower()
+
+        try:
+            if 6 >= int(answer) > 0:
+                return answer
+            else:
+                print("Please answer withing the number range 1-6")
+        except:
+            print("Please input a valid number")
+
 def removeTypes(answer, rows):
     new_rows = []
     if answer == 'yes':
@@ -47,6 +59,12 @@ def remainingTypes(rows):
             types.append(pokemon[3])
     return types
 
+def removeGeneration(answer, rows):
+    new_rows = []
+    for pokemon in rows:
+        if pokemon[11] == answer:
+            new_rows.append(pokemon)
+    return new_rows
 
 
 def main():
@@ -63,6 +81,12 @@ def main():
     has_multiple_types = ask_question("Does the species have more than one type?")
     rows = removeTypes(has_multiple_types, rows)
     print("Currently", len(rows), "in the knowledge base")
+
+    # Generation
+    generation = ask_generation("What generation is the species")
+    rows = removeGeneration(generation, rows)
+    for i in rows:
+        print(i)
 
     # Type asker
     asked_types = []
@@ -85,6 +109,8 @@ def main():
                 print("That Pokemon does not exist in our system :(")
                 return -1
 
+
+
     # is_capable_of_evolving = ask_question("Is the species capable of evolving?")
     # has_particular_type = ask_question("Does the species have a particular type?")
     # is_particular_color = ask_question("Is the species a particular color?")
@@ -95,7 +121,8 @@ def main():
 
     print("\nSpecies characteristics summary:")
     print("Has more than one type:", has_multiple_types)
-    print("Types:", confirmed_types[0], confirmed_types[1])
+    print("Generation:", generation)
+    print("Types:", confirmed_types)
     # print("Capable of evolving:", is_capable_of_evolving)
     # print("Has it evolved from something?, has_evolved)
     # print("Has a particular type:", has_particular_type)
