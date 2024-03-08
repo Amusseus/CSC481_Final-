@@ -50,6 +50,21 @@ def removeSpecificType(type, answer, rows):
         print('removed pokemon with type', type)
         return new_rows
 
+def filterLegendary(answer, rows):
+    new_rows = []
+    if answer == 'yes':
+        for pokemon in rows:
+            if pokemon[12] == 'True':
+                new_rows.append(pokemon)
+        print('only pokemon with legendary status remain')
+        return new_rows
+    if answer == 'no':
+        for pokemon in rows:
+            if pokemon[12] == 'True':
+                new_rows.append(pokemon)
+        print('removed legendary pokemon')
+        return new_rows
+
 def remainingTypes(rows):
     types = []
     for pokemon in rows:
@@ -66,6 +81,8 @@ def removeGeneration(answer, rows):
             new_rows.append(pokemon)
     return new_rows
 
+def evolvedRemoval(answer, rows):
+    return 0
 
 def main():
     rows = []
@@ -78,17 +95,21 @@ def main():
     print("Welcome to the Pokinator: Pokemon identification program!")
     print("Currently", len(rows), "in the knowledge base")
 
+
+    # What Generation is the Pokemon from?
+    generation = ask_generation("What generation is the species")
+    rows = removeGeneration(generation, rows)
+    print("Currently", len(rows), "in the knowledge base")
+
+    # Does the Pokemon have different types?
     has_multiple_types = ask_question("Does the species have more than one type?")
     rows = removeTypes(has_multiple_types, rows)
     print("Currently", len(rows), "in the knowledge base")
 
-    # Generation
-    generation = ask_generation("What generation is the species")
-    rows = removeGeneration(generation, rows)
-    for i in rows:
-        print(i)
+    # for i in rows:
+    #     print(i)
 
-    # Type asker
+    # Is it this type?
     asked_types = []
     types = remainingTypes(rows)
     confirmed_types = []
@@ -109,9 +130,16 @@ def main():
                 print("That Pokemon does not exist in our system :(")
                 return -1
 
+    # Is it a legendary
+    for pokemon in rows:
+        if pokemon[12] == 'True':
+            is_legendary = ask_question("Is the Pokemon Legendary?")
+            rows = filterLegendary(is_legendary, rows)
+            print("Currently", len(rows), "in the knowledge base")
+
+    # has_evolved = ask_question("Has the Pokemon evolved?")
 
 
-    # is_capable_of_evolving = ask_question("Is the species capable of evolving?")
     # has_particular_type = ask_question("Does the species have a particular type?")
     # is_particular_color = ask_question("Is the species a particular color?")
     # has_particular_body_shape = ask_question("Is the species a particular body shape?")
