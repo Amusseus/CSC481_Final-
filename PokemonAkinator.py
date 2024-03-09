@@ -1,5 +1,6 @@
 import csv
 
+
 def ask_question(question):
     while True:
         answer = input(question + " (yes/no): ").lower()
@@ -7,6 +8,7 @@ def ask_question(question):
             return answer
         else:
             print("Please answer with 'yes' or 'no'.")
+
 
 def ask_generation(question):
     while True:
@@ -20,7 +22,8 @@ def ask_generation(question):
         except:
             print("Please input a valid number")
 
-def removeTypes(answer, rows):
+
+def remove_types(answer, rows):
     new_rows = []
     if answer == 'yes':
         for pokemon in rows:
@@ -35,7 +38,8 @@ def removeTypes(answer, rows):
         print('removed pokemon with multiple types')
         return new_rows
 
-def removeSpecificType(type, answer, rows):
+
+def remove_specific_type(type, answer, rows):
     new_rows = []
     if answer == 'yes':
         for pokemon in rows:
@@ -50,7 +54,8 @@ def removeSpecificType(type, answer, rows):
         print('removed pokemon with type', type)
         return new_rows
 
-def filterLegendary(answer, rows):
+
+def filter_legendary(answer, rows):
     new_rows = []
     if answer == 'yes':
         for pokemon in rows:
@@ -65,7 +70,8 @@ def filterLegendary(answer, rows):
         print('removed legendary pokemon')
         return new_rows
 
-def remainingTypes(rows):
+
+def remaining_types(rows):
     types = []
     for pokemon in rows:
         if pokemon[2] not in types:
@@ -74,15 +80,18 @@ def remainingTypes(rows):
             types.append(pokemon[3])
     return types
 
-def removeGeneration(answer, rows):
+
+def remove_generation(answer, rows):
     new_rows = []
     for pokemon in rows:
         if pokemon[11] == answer:
             new_rows.append(pokemon)
     return new_rows
 
-def evolvedRemoval(answer, rows):
+
+def evolved_removal(answer, rows):
     return 0
+
 
 def main():
     rows = []
@@ -95,15 +104,14 @@ def main():
     print("Welcome to the Pokinator: Pokemon identification program!")
     print("Currently", len(rows), "in the knowledge base")
 
-
     # What Generation is the Pokemon from?
     generation = ask_generation("What generation is the species")
-    rows = removeGeneration(generation, rows)
+    rows = remove_generation(generation, rows)
     print("Currently", len(rows), "in the knowledge base")
 
     # Does the Pokemon have different types?
     has_multiple_types = ask_question("Does the species have more than one type?")
-    rows = removeTypes(has_multiple_types, rows)
+    rows = remove_types(has_multiple_types, rows)
     print("Currently", len(rows), "in the knowledge base")
 
     # for i in rows:
@@ -111,17 +119,17 @@ def main():
 
     # Is it this type?
     asked_types = []
-    types = remainingTypes(rows)
+    types = remaining_types(rows)
     confirmed_types = []
     for ptype in types:
-        remaining_types = remainingTypes(rows)
-        if asked_types == remainingTypes(rows):
+        remaining_types = remaining_types(rows)
+        if asked_types == remaining_types(rows):
             break
         if ptype == '':
             asked_types.append('')
         if ptype not in asked_types and len(rows) != 0 and ptype != '' and ptype in remaining_types:
             is_type = ask_question("Is the type " + ptype + "?")
-            rows = removeSpecificType(ptype, is_type, rows)
+            rows = remove_specific_type(ptype, is_type, rows)
             asked_types.append(ptype)
             if is_type == 'yes':
                 confirmed_types.append(ptype)
@@ -134,18 +142,13 @@ def main():
     for pokemon in rows:
         if pokemon[12] == 'True':
             is_legendary = ask_question("Is the Pokemon Legendary?")
-            rows = filterLegendary(is_legendary, rows)
+            rows = filter_legendary(is_legendary, rows)
             print("Currently", len(rows), "in the knowledge base")
 
     # has_evolved = ask_question("Has the Pokemon evolved?")
-
-
     # has_particular_type = ask_question("Does the species have a particular type?")
     # is_particular_color = ask_question("Is the species a particular color?")
     # has_particular_body_shape = ask_question("Is the species a particular body shape?")
-
-    for pokemon in rows:
-        print(pokemon)
 
     print("\nSpecies characteristics summary:")
     print("Has more than one type:", has_multiple_types)
@@ -156,6 +159,7 @@ def main():
     # print("Has a particular type:", has_particular_type)
     # print("Is a particular color:", is_particular_color)
     # print("Has a particular body shape:", has_particular_body_shape)
+
 
 if __name__ == "__main__":
     main()
