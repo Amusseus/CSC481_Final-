@@ -1,3 +1,2 @@
-# CSC481_Final-
-Final Project for CSC 481: Knowledge Based Systems 
-Pokemon Wordle: A pokemon based wordle game 
+# CSC481_Final - Amogh Prajapati, Umair Pathan, Murat Oney, Muhammad Qureshi
+Pokemon Akinator - Pick any pokemon and Pokemon Akinator will guess which one you thought of.
