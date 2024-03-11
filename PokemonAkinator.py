@@ -191,7 +191,7 @@ def generate_KB():
         return type_resistance_map
 
     KB = [] # list of Pokemon Objects 
-    with open('pokemon_data.csv', newline='') as csv_file:
+    with open('pokemon_dataset.csv', newline='') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter='\t') # tab seperated, not comma seperated
         next(csv_reader, None) # skiping header 
         for entry in csv_reader: 
