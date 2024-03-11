@@ -120,7 +120,6 @@ class Pokemon:
                 print(f'  "{key}": "{value}",')
         print("}")
 
-
 # Methods to create and modify KB
 
 # generates the pokemon KB and returns a list of pokemon facts       
@@ -191,7 +190,7 @@ def generate_KB():
         return type_resistance_map
 
     KB = [] # list of Pokemon Objects 
-    with open('pokemon_dataset.csv', newline='') as csv_file:
+    with open('pokemon_dataset.csv', newline='', encoding='utf-8') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter='\t') # tab seperated, not comma seperated
         next(csv_reader, None) # skiping header 
         for entry in csv_reader: 
@@ -201,6 +200,9 @@ def generate_KB():
             national_pokedex_number = int(entry[0])
             type_one = entry[4] if len(entry[4]) > 0 else None 
             type_two = entry[5] if len(entry[5]) > 0 else None 
+            # edge case check, some pokemon have redundant type like Muk, which is poison and poison type 
+            if type_one == type_two:
+                type_two = None
             height = float(entry[9])
             weight = float(entry[10])
             hp = int(entry[13])
@@ -431,6 +433,13 @@ def main():
     if has_multiple_types:
         KB ,second_type, _, _, _ = search_for_type(KB, type_stack, resist_stack, weak_stack)
         check_solution(KB)
+    else: 
+        average_base_stat_total = get_average('base_stat_total', KB)
+        greater_than_avergae = ask_question('Does your pokemon have a base stat total greater than ' + str(average_base_stat_total) + "?")
+        opernad = "<="
+        if greater_than_avergae:
+            opernad = ">"
+        KB = filter_KB("base_stat_total:" +opernad + ":" + str(average_base_stat_total), KB) 
 
     # ask remaining pokemon: 
     while len(KB) != 1:
