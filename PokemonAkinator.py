@@ -2,14 +2,6 @@ import csv
 import sys 
 from collections import defaultdict
 
-def ask_question(question):
-    while True:
-        answer = input(question + " (yes/no): ").lower()
-        if answer == 'yes' or answer == 'no':
-            return True if answer == "yes" else False
-        else:
-            print("Please answer with 'yes' or 'no'.")
-
 # Pokemon class that stores all information about one pokemon as an object 
 class Pokemon:
     def __init__(self,
@@ -120,9 +112,9 @@ class Pokemon:
                 print(f'  "{key}": "{value}",')
         print("}")
 
-# Methods to create and modify KB
+# Methods to create/modify KB 
 
-# generates the pokemon KB and returns a list of pokemon facts       
+# generates the pokemon KB and returns a list of pokemon objects      
 def generate_KB():
     # returns integer of the number represented by the roman numeral 
     def get_number_from_roman(roman_numeral):
@@ -297,13 +289,15 @@ def filter_KB(query, KB):
     elif query_parts[1] == "<=":
         return list(filter(lambda pokemon: getattr(pokemon, query_parts[0]) <= query_parts[2], KB))
 
-# only works for attributes with numeric type: int or float 
+# takes an attribute and returns the average of that attribute in the KB, only works for numeric attributes 
 def get_average(atttribute, KB):
     total = 0
     for entry in KB: 
         total += getattr(entry, atttribute)
     return total/len(KB)
 
+# returns type count information about the KB as collection of maps for weaknesses, resistances, and type_of
+# type_weakness_map, type_resistance_map, type_map
 def get_KB_type_matchup(KB):
     number_pokemon_weak = defaultdict(int)
     number_pokemon_resist = defaultdict(int)
@@ -320,6 +314,7 @@ def get_KB_type_matchup(KB):
                 number_pokemon_weak[key] += 1
     return number_pokemon_weak, number_pokemon_resist, number_type
 
+# prints the KB as either list of json, used for debugging purposes 
 def print_KB(KB, mode):
     for entry in KB:
         if mode == 0:
@@ -327,6 +322,9 @@ def print_KB(KB, mode):
         else:
             entry.print_json()
 
+# methods utilized for game like win condition, and asking question 
+
+# checks for win condition, and prints final info 
 def check_solution(KB, version, number_question):
     if len(KB) == 1: 
         if version == 0:
@@ -335,6 +333,15 @@ def check_solution(KB, version, number_question):
             print("GAME_FINISHED " + KB[0].name + " : " + str(number_question) +" ***")
         sys.exit()
 
+# asks questions and returns True for yes and False for no 
+def ask_question(question):
+    while True:
+        answer = input(question + " (yes/no): ").lower()
+        if answer == 'yes' or answer == 'no':
+            return True if answer == "yes" else False
+        else:
+            print("Please answer with 'yes' or 'no'.")
+
 # runs, the game, version 0 for human players, version 1 for computer players 
 def start_game(version):
     KB = generate_KB()
@@ -342,7 +349,7 @@ def start_game(version):
     if version == 0:
         print("Welcome to the Pokinator: Pokemon identification program!")
 
-    # dual type or not 
+    # mono vs dual type check 
     multiple_type_question = "Does the pokemon have more than one type?"
     if version == 1: 
         multiple_type_question = "MUL_TYPE"
@@ -350,7 +357,7 @@ def start_game(version):
     number_question += 1
     KB = filter_KB("has_dual_type:=:" + str(has_multiple_types), KB)
 
-    # generations 
+    # generations check
     possible_generations = [1,2,3,4,5,6,7,8]
     while len(possible_generations) != 1: 
         in_generation = None
@@ -372,7 +379,7 @@ def start_game(version):
         else: 
             possible_generations = possible_generations[(len(possible_generations)//2):]
 
-    # base stat total 
+    # base stat total check
     KB = filter_KB("generation:=:" + str(possible_generations[0]), KB)
     average_base_stat_total = get_average('base_stat_total', KB)
     greater_than_avergae = None
@@ -386,6 +393,8 @@ def start_game(version):
     number_question += 1
     KB = filter_KB("base_stat_total:" +opernad + ":" + str(average_base_stat_total), KB)
 
+    # based on the KB and type stacks(lists that maintain which types have been checked for the three categories (type_of, resist, weak)), 
+    # this method searchs and returns the type of the pokemon you guess 
     def search_for_type(KB, type_check_stack, resist_check_stack, weak_check_stack):
         num_asked = 0
         
@@ -398,6 +407,8 @@ def start_game(version):
         found_type = False
         checked_resist = False
         checked_weak = False
+
+        # type check loop 
         while not found_type: 
             if len(KB) == 1: 
                 return KB, KB[0].type_one, type_check_stack, resist_check_stack, weak_check_stack, num_asked
@@ -419,6 +430,7 @@ def start_game(version):
             most_common_resist_value = number_resist[most_common_resist] if most_common_resist != None else None 
             if most_common_resist is not None: values_to_chose.append(most_common_resist_value)
 
+            # chosing which category to ask question from 
             maxValue = max(values_to_chose)
             if maxValue == most_common_type_value or (checked_resist and checked_weak):
                 checked_weak = False
@@ -464,15 +476,18 @@ def start_game(version):
                 else:
                     KB = filter_KB("weak_type:!=:" + most_common_weakness, KB)
                
+    # type check 
     KB, first_type, type_stack, resist_stack, weak_stack, num_asked = search_for_type(KB, [], [], [])
     number_question += num_asked
     check_solution(KB, version, number_question)
 
     if has_multiple_types:
+        # type check two 
         KB ,second_type, _, _, _, num_asked = search_for_type(KB, type_stack, resist_stack, weak_stack)
         number_question += num_asked
         check_solution(KB, version, number_question)
     else: 
+        # base state total check two 
         average_base_stat_total = get_average('base_stat_total', KB)
         greater_than_avergae = None
         if version == 0:
@@ -485,7 +500,7 @@ def start_game(version):
         number_question += 1
         KB = filter_KB("base_stat_total:" +opernad + ":" + str(average_base_stat_total), KB) 
 
-    # ask remaining pokemon: 
+    # check remaining pokemon one by one 
     while len(KB) > 1:
         pokemon_name = KB[0].name
         answer = None
@@ -501,7 +516,7 @@ def start_game(version):
     check_solution(KB, version, number_question)
 
 if __name__ == "__main__":
-    #version check
+    # version check is only implemented so that this game can be played by the Computer agent, it is not necessary for human players 
     version = 0
     if len(sys.argv) > 1: 
         version = int(sys.argv[1])    

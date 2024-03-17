@@ -1,3 +1,4 @@
+#Tool for testing Pokemon Akinator game, plays all pokemon and generates statistics based on collected data 
 import subprocess as sb 
 import select 
 from PokemonAkinator import Pokemon, generate_KB
@@ -12,6 +13,12 @@ Game statistics to monitor:
     - average num question for that generation 
     - average num question of mono/dual type 
 '''
+min_number_questions = 1000000000
+min_number_questions_pokemon = None
+
+max_number_questions = 0
+max_number_questions_pokemon = None
+
 total_number_question_all = 0
 total_number_pokemon = 0
 
@@ -31,6 +38,8 @@ def update_statistic(pokemon, number_questions):
     global total_number_question_all, total_number_pokemon
     global total_number_questions_dual, total_number_pokemon_dual
     global total_number_questions_mono, total_number_pokemon_mono
+    global min_number_questions, min_number_questions_pokemon
+    global max_number_questions, max_number_questions_pokemon
 
     total_number_question_all += number_questions
     total_number_pokemon += 1
@@ -52,6 +61,14 @@ def update_statistic(pokemon, number_questions):
     else:
         total_number_questions_mono += number_questions
         total_number_pokemon_mono += 1
+
+    if min_number_questions > number_questions:
+        min_number_questions = number_questions
+        min_number_questions_pokemon = pokemon.name
+
+    if max_number_questions < number_questions:
+        max_number_questions = number_questions
+        max_number_questions_pokemon = pokemon.name
 
 def find_solution(pokemon, question):
     question_list = question.split()
@@ -79,6 +96,7 @@ def find_solution(pokemon, question):
         return True
 
 KB = generate_KB()
+# plays the game for each entry in the KB 
 for entry in KB:
     print("GUESSING POKEMON: " + entry.name)
     # play the pokemon akinator game for each entry     
@@ -101,8 +119,6 @@ for entry in KB:
                 if game_fds in ready_to_read:
                     current_read = game_fds.read(1).decode('utf-8')
                     game_output += current_read
-                    if entry.name == "Type:Null":
-                        print(game_output)
                     if game_output[-(len(finish_phrase)):] == finish_phrase or game_output[-len(end_phrase):] == end_phrase:
                         # found end
                         break 
@@ -126,3 +142,7 @@ for key in total_number_questions_type.keys():
     print("The average number of questions for the type " + key + " : " + str(total_number_questions_type[key]/total_number_pokemon_type[key]))
 print("The average number of questions for mono-type pokemon: " + str(total_number_questions_mono/total_number_pokemon_mono))
 print("The average number of questions for dual pokemon: " + str(total_number_questions_dual/total_number_pokemon_dual))
+print("The pokemon with the least amount of questions asked is " + min_number_questions_pokemon + " : " + str(min_number_questions))
+print("The pokemon with the most amount of questions asked is " + max_number_questions_pokemon + " : " + str(max_number_questions))
+
+
